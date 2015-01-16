@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Canvas Example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <script type="text/javascript" src="/sdk/js/all.js"></script>   
+</head>
+<body>
+    <script> 
+        // Bootstrap the page once the DOM is ready.
+        Sfdc.canvas(function() {
+            // On Ready...
+            var login    = Sfdc.canvas.byId("login");
+            var get    = Sfdc.canvas.byId("get");
+            var loggedIn = Sfdc.canvas.oauth.loggedin();
+            var token = Sfdc.canvas.oauth.token();
+            login.innerHTML = (loggedIn) ? "Logout" : "Login";
+            get.innerHTML = (loggedIn) ? "Get My Feed" : "";
+            if (loggedIn) {
+                Sfdc.canvas.byId("oauth").innerHTML = Sfdc.canvas.oauth.token();  
+            }
+            login.onclick=loginHandler; 
+            get.onclick=getFeedHandler;
+        });
+
+        function loginHandler(e) { 
+            var uri;
+            if (! Sfdc.canvas.oauth.loggedin()) {
+                uri = Sfdc.canvas.oauth.loginUrl();
+                Sfdc.canvas.oauth.login(
+                    {uri : uri,
+                        params: {
+                            response_type : "token",
+                            client_id : "6377545904438521341",
+                            redirect_uri : encodeURIComponent(
+                                "https://beta.briancline.net/sdk/callback.html")
+                }});
+                Sfdc.canvas.oauth.logout();
+                login.innerHTML = "Login";
+                Sfdc.canvas.byId("oauth").innerHTML = "";
+            }
+            return false;
+        }        
+        
+        function getFeedHandler(e) {
+                Sfdc.canvas.client.ajax(
+                        'https://na16.salesforce.com/services/data/v26.0/chatter/feeds/news/me/feed-items',   
+                           {   
+                            success : function(data) {
+                                console.log(data);
+                                Sfdc.canvas.byId("results").innerHTML=JSON.stringify(data);
+                            }
+                        });
+        } 
+ 
+    </script>
+ 
+   <h1 id="header">Site44 Canvas App</h1>
+    <div>
+        <span id="oauth"></span>
+    </div>
+    <div>
+        <a id="login" href="#">Login</a><br/>
+    </div>
+   <div>
+        <a id="get" href="#"></a><br/>
+    </div>
+    <div>
+        <span id="results">
+    </div>
+</div>    
+</body>
+</html>
